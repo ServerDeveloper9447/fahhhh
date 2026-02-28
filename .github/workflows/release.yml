@@ -62,10 +62,12 @@ jobs:
           
           if [ "${{ matrix.goos }}" = "linux" ]; then
             if [ "${{ matrix.goarch }}" = "arm64" ]; then
-              export PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig
+              export PKG_CONFIG_LIBDIR=/usr/lib/aarch64-linux-gnu/pkgconfig
+              export CGO_CFLAGS="-I/usr/include/aarch64-linux-gnu"
               export CGO_LDFLAGS="-L/usr/lib/aarch64-linux-gnu"
             elif [ "${{ matrix.goarch }}" = "arm" ]; then
-              export PKG_CONFIG_PATH=/usr/lib/arm-linux-gnueabihf/pkgconfig
+              export PKG_CONFIG_LIBDIR=/usr/lib/arm-linux-gnueabihf/pkgconfig
+              export CGO_CFLAGS="-I/usr/include/arm-linux-gnueabihf"
               export CGO_LDFLAGS="-L/usr/lib/arm-linux-gnueabihf"
             fi
           fi
