@@ -2,11 +2,12 @@ package main
 
 import (
 	"embed"
-	"regexp"
 	"flag"
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
+	"runtime"
 	"strings"
 	"time"
 
@@ -54,6 +55,35 @@ PROMPT_COMMAND="_err_sound_hook; $PROMPT_COMMAND"
 `, toBashDir(dirSlash))
 		return path, hook
 
+	case "bash":
+		path := filepath.Join(home, ".bashrc")
+		dirSlash := filepath.ToSlash(dir)
+		hook := fmt.Sprintf(`
+export PATH="%s:$PATH"
+_err_sound_hook() {
+  local status=$?
+  if [ $status -ne 0 ]; then
+    ( fahhhh play > /dev/null 2>&1 & disown)
+  fi
+}
+PROMPT_COMMAND="_err_sound_hook; $PROMPT_COMMAND"
+`, toBashDir(dirSlash))
+		return path, hook
+
+	case "zsh":
+		path := filepath.Join(home, ".zshrc")
+		dirSlash := filepath.ToSlash(dir)
+		hook := fmt.Sprintf(`
+export PATH="%s:$PATH"
+_err_sound_hook() {
+	local status=$?
+	if [ $status -ne 0 ]; then
+		(fahhhh play > /dev/null 2>&1 & )
+	fi
+precmd_functions+=(_err_sound_hook)
+`, toBashDir(dirSlash))
+		return path, hook
+
 	case "powershell.exe":
 		// PowerShell Desktop and Core use different profile paths
 		path := filepath.Join(home, "Documents", "WindowsPowerShell", "Microsoft.PowerShell_profile.ps1")
@@ -93,7 +123,21 @@ func toBashDir(dir string) string {
 }
 
 func install() {
-	appData := os.Getenv("APPDATA")
+	appData := ""
+	switch runtime.GOOS {
+	case "windows":
+		appData = os.Getenv("APPDATA")
+	case "linux":
+		appData := os.Getenv("XDG_DATA_HOME")
+		if appData == "" {
+			home, _ := os.UserHomeDir()
+			appData = filepath.Join(home, ".local", "share")
+		}
+	}
+	if appData == "" {
+		fmt.Println("Cannot retrieve appdata directory.")
+		return
+	}
 	targetDir := filepath.Join(appData, "fahhhh")
 	targetPath := filepath.Join(targetDir, "fahhhh.exe")
 
@@ -127,7 +171,21 @@ func install() {
 }
 
 func uninstall() {
-	appData := os.Getenv("APPDATA")
+	appData := ""
+	switch runtime.GOOS {
+	case "windows":
+		appData = os.Getenv("APPDATA")
+	case "linux":
+		appData := os.Getenv("XDG_DATA_HOME")
+		if appData == "" {
+			home, _ := os.UserHomeDir()
+			appData = filepath.Join(home, ".local", "share")
+		}
+	}
+	if appData == "" {
+		fmt.Println("Cannot retrieve appdata directory.")
+		return
+	}
 	targetDir := filepath.Join(appData, "fahhhh")
 	targetPath := filepath.Join(targetDir, "fahhhh.exe")
 	shell := detectShell()
