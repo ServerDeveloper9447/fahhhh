@@ -128,7 +128,7 @@ func install() {
 	case "windows":
 		appData = os.Getenv("APPDATA")
 	case "linux":
-		appData := os.Getenv("XDG_DATA_HOME")
+		appData = os.Getenv("XDG_DATA_HOME")
 		if appData == "" {
 			home, _ := os.UserHomeDir()
 			appData = filepath.Join(home, ".local", "share")
