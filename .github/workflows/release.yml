@@ -75,9 +75,6 @@ jobs:
           if [ "${{ matrix.goos }}" = "windows" ]; then
             BINARY_NAME="${BINARY_NAME}.exe"
           fi
-          if [ "${{ matrix.cgo }}" = "1" ]; then
-            LDFLAGS="$LDFLAGS -extldflags=-static"
-          fi
           
           go build -ldflags="$LDFLAGS" -v -o "$BINARY_NAME"
           echo "BINARY_NAME=$BINARY_NAME" >> $GITHUB_ENV
