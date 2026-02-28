@@ -66,7 +66,7 @@ _err_sound_hook() {
     ( fahhhh play > /dev/null 2>&1 & disown)
   fi
 }
-PROMPT_COMMAND="_err_sound_hook; $PROMPT_COMMAND"
+PROMPT_COMMAND="_err_sound_hook"
 `, toBashDir(dirSlash))
 		return path, hook
 
@@ -143,11 +143,11 @@ func install() {
 	targetPath := ""
 	switch runtime.GOOS {
 	case "windows":
-	targetPath = filepath.Join(targetDir, "fahhhh.exe")
+		targetPath = filepath.Join(targetDir, "fahhhh.exe")
 	case "linux":
-	targetPath = filepath.Join(targetDir, "fahhhh")
+		targetPath = filepath.Join(targetDir, "fahhhh")
 	}
-	
+
 	_ = os.Mkdir(targetDir, 0755)
 
 	selfPath, err := os.Executable()
@@ -183,7 +183,7 @@ func uninstall() {
 	case "windows":
 		appData = os.Getenv("APPDATA")
 	case "linux":
-		appData := os.Getenv("XDG_DATA_HOME")
+		appData = os.Getenv("XDG_DATA_HOME")
 		if appData == "" {
 			home, _ := os.UserHomeDir()
 			appData = filepath.Join(home, ".local", "share")
@@ -197,9 +197,9 @@ func uninstall() {
 	targetPath := ""
 	switch runtime.GOOS {
 	case "windows":
-	targetPath = filepath.Join(targetDir, "fahhhh.exe")
+		targetPath = filepath.Join(targetDir, "fahhhh.exe")
 	case "linux":
-	targetPath = filepath.Join(targetDir, "fahhhh")
+		targetPath = filepath.Join(targetDir, "fahhhh")
 	}
 	shell := detectShell()
 	configPath, _ := getHookForShell(shell, targetPath)
