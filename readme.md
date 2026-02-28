@@ -16,10 +16,15 @@ The commands are:
 ```
 
 ##  Support
-You'll need a x86_64 windows system.
-We currently **only** natively support:
-- Bash/Git bash
+OSes:
+- Linux [amd64, arm64] (needs libasound2-dev)
+- Windows [amd64, arm64, 386]
+
+Terminals:
+- Bash
+- Git bash
 - Powershell
+- Zsh
 
 ## For unsupported terminals
 You can add a script to your terminal's .bashrc equivalent file:
