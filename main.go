@@ -76,10 +76,11 @@ PROMPT_COMMAND="_err_sound_hook; $PROMPT_COMMAND"
 		hook := fmt.Sprintf(`
 export PATH="%s:$PATH"
 _err_sound_hook() {
-	local status=$?
-	if [ $status -ne 0 ]; then
+	local code=$?
+	if [ $code -ne 0 ]; then
 		(fahhhh play > /dev/null 2>&1 & )
 	fi
+}
 precmd_functions+=(_err_sound_hook)
 `, toBashDir(dirSlash))
 		return path, hook
@@ -139,8 +140,14 @@ func install() {
 		return
 	}
 	targetDir := filepath.Join(appData, "fahhhh")
-	targetPath := filepath.Join(targetDir, "fahhhh.exe")
-
+	targetPath := ""
+	switch runtime.GOOS {
+	case "windows":
+	targetPath = filepath.Join(targetDir, "fahhhh.exe")
+	case "linux":
+	targetPath = filepath.Join(targetDir, "fahhhh")
+	}
+	
 	_ = os.Mkdir(targetDir, 0755)
 
 	selfPath, err := os.Executable()
@@ -187,7 +194,13 @@ func uninstall() {
 		return
 	}
 	targetDir := filepath.Join(appData, "fahhhh")
-	targetPath := filepath.Join(targetDir, "fahhhh.exe")
+	targetPath := ""
+	switch runtime.GOOS {
+	case "windows":
+	targetPath = filepath.Join(targetDir, "fahhhh.exe")
+	case "linux":
+	targetPath = filepath.Join(targetDir, "fahhhh")
+	}
 	shell := detectShell()
 	configPath, _ := getHookForShell(shell, targetPath)
 
