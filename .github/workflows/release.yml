@@ -38,14 +38,10 @@ jobs:
           sudo dpkg --add-architecture arm64
           sudo dpkg --add-architecture armhf
           
-          # Clean and reconfigure sources for Noble (24.04)
-          sudo rm -f /etc/apt/sources.list.d/*.sources
-          sudo rm -f /etc/apt/sources.list
+          sudo find /etc/apt/ -name "*.list" -delete
+          sudo find /etc/apt/ -name "*.sources" -delete
           
-          # Create AMD64 sources
           echo -e "Types: deb\nURIs: http://azure.archive.ubuntu.com/ubuntu/ http://security.ubuntu.com/ubuntu/\nSuites: noble noble-updates noble-security noble-backports\nComponents: main restricted universe multiverse\nArchitectures: amd64" | sudo tee /etc/apt/sources.list.d/amd64.sources
-
-          # Create ARM64/ARMHF sources
           echo -e "Types: deb\nURIs: http://ports.ubuntu.com/ubuntu-ports/\nSuites: noble noble-updates noble-security noble-backports\nComponents: main restricted universe multiverse\nArchitectures: arm64 armhf" | sudo tee /etc/apt/sources.list.d/arm-ports.sources
 
           sudo apt-get update
@@ -63,12 +59,24 @@ jobs:
         run: |
           BINARY_NAME=fahhhh-${{ matrix.goos }}-${{ matrix.goarch }}
           LDFLAGS="-s -w"
+          
+          if [ "${{ matrix.goos }}" = "linux" ]; then
+            if [ "${{ matrix.goarch }}" = "arm64" ]; then
+              export PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig
+              export CGO_LDFLAGS="-L/usr/lib/aarch64-linux-gnu"
+            elif [ "${{ matrix.goarch }}" = "arm" ]; then
+              export PKG_CONFIG_PATH=/usr/lib/arm-linux-gnueabihf/pkgconfig
+              export CGO_LDFLAGS="-L/usr/lib/arm-linux-gnueabihf"
+            fi
+          fi
+
           if [ "${{ matrix.goos }}" = "windows" ]; then
             BINARY_NAME="${BINARY_NAME}.exe"
           fi
           if [ "${{ matrix.cgo }}" = "1" ]; then
             LDFLAGS="$LDFLAGS -extldflags=-static"
           fi
+          
           go build -ldflags="$LDFLAGS" -v -o "$BINARY_NAME"
           echo "BINARY_NAME=$BINARY_NAME" >> $GITHUB_ENV
 
